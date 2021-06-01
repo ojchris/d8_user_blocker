@@ -4,6 +4,7 @@ namespace Drupal\user_blocker\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\User;
 
 /**
  * Provides a User Blocker form.
@@ -51,7 +52,7 @@ class BlockerForm extends FormBase {
     parent::validateForm($form, $form_state);
 
       $userid = $form_state->getValue('userid');
-      $user = \Drupal\user\Entity\User::load($userid);
+      //$user = \Drupal\user\Entity\User::load($userid);
     
         $current_user = \Drupal::currentUser();
         if ($userid == $current_user->id()) {
