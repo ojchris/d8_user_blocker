@@ -22,30 +22,13 @@ class BlockerForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-   /* $form['message'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Message'),
-      '#required' => TRUE,
-    ];
-
-    $form['actions'] = [
-      '#type' => 'actions',
-    ];
-    $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Send'),
-    ];
-
-    return $form;
-    */
-
-    $form['username'] = [
-      '#type' => 'textfield',
+//autocomplete stores uid values of the username selected
+    $form['userid'] = [
+      '#type' => 'entity_autocomplete',
+      '#target_type' => 'user',
       '#title' => $this->t('Username'),
       '#description' => $this->t('Enter the username of the user you want to block.'),
-      '#maxlength' => 64,
-      '#size' => 64,
-      '#weight' => '0',
+      '#required' => 'true',
     ];
     $form['submit'] = [
       '#type' => 'submit',
@@ -67,23 +50,17 @@ class BlockerForm extends FormBase {
 
     parent::validateForm($form, $form_state);
 
-      $username = $form_state->getValue('username');
-      $user = user_load_by_name($username);
-      if (empty($user)) {
-        $form_state->setError(
-          $form['username'],
-          $this->t('User %username was not found.', ['%username' => $username])
-        );
-      }
-      else {
+      $userid = $form_state->getValue('userid');
+      $user = \Drupal\user\Entity\User::load($userid);
+    
         $current_user = \Drupal::currentUser();
-        if ($user->id() == $current_user->id()) {
+        if ($userid == $current_user->id()) {
           $form_state->setError(
-            $form['username'],
+            $form['userid'],
             $this->t('You cannot block your own account.')
           );
         }
-      }
+      
     
   }
 
@@ -97,8 +74,8 @@ class BlockerForm extends FormBase {
     */
 
     
-    $username = $form_state->getValue('username');
-    $user = user_load_by_name($username);
+    $user_id = $form_state->getValue('userid');
+    $user = User::load($user_id);
     $user->block();
     $user->save();
     $this->messenger()->addMessage($this->t('User %username has been blocked.', ['%username' => $user->getAccountName()]));
